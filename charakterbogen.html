@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Charakterbogen — Rondria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #1c150f;
+    --paper-2: #291f16;
+    --paper-3: #332619;
+    --ink: #e6d9b8;
+    --ink-dim: #b6a883;
+    --ink-faint: #7c705a;
+    --rubric: #c1502f;
+    --rubric-dim: #8f3a22;
+    --line: rgba(230,217,184,0.16);
+    --line-strong: rgba(230,217,184,0.3);
+    --font-black: 'UnifrakturCook', cursive;
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'EB Garamond', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 3px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(ellipse 700px 500px at 12% 6%, rgba(193,80,47,0.09), transparent 60%),
+      radial-gradient(ellipse 500px 400px at 92% 12%, rgba(193,80,47,0.05), transparent 55%),
+      radial-gradient(circle at 50% 40%, transparent 45%, rgba(0,0,0,0.5) 140%);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    padding: 0 1.5rem 5rem;
+  }
+
+  .toolbar{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--line-strong);
+    padding: 0.85rem 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .toolbar-title{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  .toolbar-left{ display:flex; align-items:center; gap: 1.25rem; flex-wrap: wrap; }
+  .toolbar-nav{ display:flex; align-items:center; gap: 0.9rem; }
+  .toolbar-nav a{
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .toolbar-nav a:hover{ color: var(--rubric); border-bottom-color: var(--rubric); }
+  .toolbar-actions{ display:flex; align-items:center; gap: 0.75rem; }
+  .save-status{
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    min-height: 1em;
+  }
+  .toolbar-btn{
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-dim);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display:inline-block;
+  }
+  .toolbar-btn:hover{ border-color: var(--rubric); color: var(--rubric); }
+  .toolbar-btn-primary{
+    background: var(--rubric-dim);
+    border-color: var(--rubric);
+    color: var(--ink);
+  }
+  .toolbar-btn-primary:hover{ background: var(--rubric); color: var(--ink); }
+
+  @media print{
+    .toolbar{ display:none; }
+  }
+
+  h1,h2,h3{ font-family: var(--font-display); margin:0; }
+
+  .sheet{
+    max-width: 840px;
+    margin: 0 auto 3.5rem;
+    background: var(--paper-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    padding: 2.5rem 2.75rem;
+    position: relative;
+  }
+  .sheet::before, .sheet::after{
+    content:'';
+    position:absolute;
+    width: 22px; height: 22px;
+    border: 1.5px solid var(--rubric);
+    opacity: 0.65;
+  }
+  .sheet::before{ top: 14px; left: 14px; border-right:none; border-bottom:none; }
+  .sheet::after{ bottom: 14px; right: 14px; border-left:none; border-top:none; }
+
+  /* ---------- header ---------- */
+  .sheet-head{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+  .sheet-head .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--rubric);
+    margin-bottom: 0.5rem;
+  }
+  .sheet-title{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 2.8rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-shadow: 0 0 20px rgba(193,80,47,0.2);
+    line-height: 1.1;
+  }
+
+  /* ---------- top stat strip ---------- */
+  .stat-strip{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 1.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .stat-field{
+    display:flex;
+    align-items:baseline;
+    gap: 0.5rem;
+  }
+  .stat-field label{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .stat-field input{
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--rubric);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    width: 90px;
+    padding: 2px 4px;
+  }
+  .stat-field input:focus{ outline:none; border-bottom-color: var(--rubric); }
+
+  /* ---------- section labels ---------- */
+  .section-label{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--ink);
+    margin: 0 0 0.6rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* ---------- grid layout page 1 ---------- */
+  .grid-1{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .lined{
+    width:100%;
+    background-color: var(--paper);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(1.9em - 1px),
+      var(--line) calc(1.9em - 1px),
+      var(--line) 1.9em
+    );
+    background-attachment: local;
+    line-height: 1.9em;
+    padding: 0;
+    border: none;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1.02rem;
+    resize: vertical;
+  }
+  .lined::placeholder{ color: var(--ink-faint); font-style: italic; }
+  .lined:focus{ outline:none; }
+
+  .werte-list{ display:flex; flex-direction:column; gap: 0.55rem; }
+  .werte-row{
+    display:flex;
+    align-items:baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .werte-row label{ font-size: 1.02rem; color: var(--ink); }
+  .werte-row input{
+    width: 52px;
+    text-align:center;
+    background: var(--paper-3);
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    color: var(--rubric);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 2px 4px;
+  }
+  .werte-row input:focus{ outline: 1px solid var(--rubric); }
+
+  .werte-block{ margin-bottom: 2rem; }
+  .werte-list-row{
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .werte-list-row .werte-row{
+    border-bottom: none;
+    padding-bottom: 0;
+    gap: 0.5rem;
+  }
+
+  /* ---------- pickers ---------- */
+  .picker-block{ margin-bottom: 2rem; }
+  .picker-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+  }
+  .picker-select, .picker-custom{
+    flex: 1 1 240px;
+    background: var(--paper);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.5rem 0.6rem;
+  }
+  .picker-select:focus, .picker-custom:focus{ outline: 1px solid var(--rubric); }
+  .picker-add-btn{
+    background: var(--rubric-dim);
+    border: 1px solid var(--rubric);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .picker-add-btn:hover{ background: var(--rubric); }
+  .picker-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .picker-list li{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--rubric);
+    border-radius: var(--radius);
+    padding: 0.55rem 0.8rem;
+    font-size: 0.95rem;
+    color: var(--ink-dim);
+  }
+  .picker-list li .picker-item-text{ flex: 1; }
+  .picker-list li .picker-item-text strong{ color: var(--ink); }
+  .picker-remove-btn{
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.2rem;
+  }
+  .picker-remove-btn:hover{ color: var(--rubric); }
+  .picker-empty{
+    color: var(--ink-faint);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  /* ---------- skill wheel ---------- */
+  .wheel-wrap{
+    margin: 1rem auto 2rem;
+    max-width: 620px;
+  }
+  .wheel-caption{
+    text-align:center;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 0.5rem;
+  }
+  .wheel-ring{ fill: none; stroke: var(--line-strong); stroke-width: 1; }
+  .wheel-spoke{ stroke: var(--line); stroke-width: 1; }
+  .wheel-ringlabel{ fill: var(--ink-faint); font-family: var(--font-mono); font-size: 9px; }
+  .wheel-ringlabel-grid{
+    fill: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 7.5px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .wheel-axislabel{ fill: var(--ink); font-family: var(--font-display); font-size: 13px; font-weight: 500; }
+  .wheel-plot-fill{ fill: var(--rubric); fill-opacity: 0.16; stroke: var(--rubric); stroke-width: 2; stroke-linejoin: round; transition: all 0.15s; }
+  .wheel-plot-dot{ fill: var(--rubric); stroke: var(--paper-2); stroke-width: 1.5; }
+  .wheel-plot-label{ fill: var(--rubric); font-family: var(--font-mono); font-size: 9px; }
+
+  .wheel-reset-btn{
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-dim);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .wheel-reset-btn:hover{ border-color: var(--rubric); color: var(--rubric); }
+
+  /* ---------- page 2 ---------- */
+  .field-row{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 1.75rem;
+    margin-bottom: 2rem;
+  }
+  .field{ display:flex; align-items:baseline; gap: 0.6rem; flex: 1 1 160px; }
+  .field label{ font-family: var(--font-display); font-weight:600; font-size:1.02rem; white-space:nowrap; }
+  .field input{
+    flex:1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--rubric);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 2px 4px;
+    min-width: 60px;
+  }
+  .field input:focus{ outline:none; border-bottom-color: var(--rubric); }
+
+  .block-gap{ margin-bottom: 2rem; }
+
+  footer.editor-note{
+    max-width: 840px;
+    margin: 0 auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    line-height: 1.8;
+    text-align:center;
+  }
+
+  @media (max-width: 640px){
+    .grid-1{ grid-template-columns: 1fr; }
+    .sheet{ padding: 2rem 1.4rem; }
+    .sheet-head{ flex-direction:column; gap: 1rem; }
+  }
+
+  @media print{
+    body{ background: #f4ecd8 !important; color: #2e2013 !important; padding:0; }
+    .sheet{ background: #f4ecd8; border: 1px solid #b7a67a; box-shadow:none; break-after: page; }
+    .sheet-title{ color:#7a2124; text-shadow:none; }
+    .lined{ background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(1.9em - 1px), #c9b98d calc(1.9em - 1px), #c9b98d 1.9em); }
+    .werte-row input{ background:#eadfc4; color:#7a2124; }
+    .wheel-ring, .wheel-spoke{ stroke:#b7a67a; }
+    .wheel-ringlabel, .wheel-axislabel, .wheel-ringlabel-grid{ fill:#4a3a26; }
+    .wheel-plot-fill{ stroke:#7a2124; fill:#7a2124; fill-opacity:0.12; }
+    .wheel-plot-dot{ fill:#7a2124; stroke:#f4ecd8; }
+    #wheel-reset{ display:none; }
+    footer.editor-note{ display:none; }
+    .picker-row{ display:none; }
+    .picker-remove-btn{ display:none; }
+    .picker-list li{ background:#eadfc4; border-color:#b7a67a; color:#3a2c1c; }
+    .picker-list li .picker-item-text strong{ color:#2e2013; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="toolbar-title">Rondria — Charakterbogen</span>
+      <nav class="toolbar-nav">
+        <a href="index.html">Regelwerk</a>
+        <a href="wuerfel.html">Würfeln</a>
+      </nav>
+    </div>
+    <div class="toolbar-actions">
+      <span class="save-status" id="save-status"></span>
+      <label class="toolbar-btn" for="file-load">Laden</label>
+      <input type="file" id="file-load" accept="application/json" style="display:none;">
+      <button type="button" id="btn-save" class="toolbar-btn toolbar-btn-primary">Speichern</button>
+    </div>
+  </div>
+
+  <!-- ================= SEITE 1: SKILLSHEET ================= -->
+  <div class="sheet">
+    <div class="sheet-head">
+      <div>
+        <div class="eyebrow">Rondria · Charakterbogen</div>
+        <h1 class="sheet-title">Skillsheet</h1>
+      </div>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat-field"><label>Lebenswert</label><input type="text" data-field="lebenswert"></div>
+      <div class="stat-field"><label>Ausweichwert</label><input type="text" data-field="ausweichwert"></div>
+      <div class="stat-field"><label>Geld</label><input type="text" data-field="geldSkill"></div>
+    </div>
+
+    <div class="werte-block">
+      <div class="section-label">Werte</div>
+      <div class="werte-list werte-list-row">
+        <div class="werte-row"><label>Intelligenz</label><input type="text" data-field="werteIntelligenz"></div>
+        <div class="werte-row"><label>Agilität</label><input type="text" data-field="werteAgilitaet"></div>
+        <div class="werte-row"><label>Körperkraft</label><input type="text" data-field="werteKoerperkraft"></div>
+        <div class="werte-row"><label>Geschicklichkeit</label><input type="text" data-field="werteGeschicklichkeit"></div>
+        <div class="werte-row"><label>Belastbarkeit</label><input type="text" data-field="werteBelastbarkeit"></div>
+        <div class="werte-row"><label>Charme</label><input type="text" data-field="werteCharme"></div>
+      </div>
+    </div>
+
+    <div class="picker-block" data-picker-block="zaubertricks">
+      <div class="section-label">Zaubertricks</div>
+      <div class="picker-row">
+        <select class="picker-select"></select>
+        <input type="text" class="picker-custom" placeholder="Eigener Zaubertrick …" style="display:none;">
+        <button type="button" class="picker-add-btn">+ Hinzufügen</button>
+      </div>
+      <ul class="picker-list"></ul>
+    </div>
+
+    <div class="picker-block" data-picker-block="zauber">
+      <div class="section-label">Zauber</div>
+      <div class="picker-row">
+        <select class="picker-select"></select>
+        <input type="text" class="picker-custom" placeholder="Eigener Zauber …" style="display:none;">
+        <button type="button" class="picker-add-btn">+ Hinzufügen</button>
+      </div>
+      <ul class="picker-list"></ul>
+    </div>
+
+    <div class="picker-block" data-picker-block="fertigkeiten">
+      <div class="section-label">Fertigkeiten</div>
+      <div class="picker-row">
+        <select class="picker-select"></select>
+        <input type="text" class="picker-custom" placeholder="Eigene Fertigkeit …" style="display:none;">
+        <button type="button" class="picker-add-btn">+ Hinzufügen</button>
+      </div>
+      <ul class="picker-list"></ul>
+    </div>
+
+    <div class="picker-block" data-picker-block="ausruestung">
+      <div class="section-label">Ausrüstung</div>
+      <div class="picker-row">
+        <select class="picker-select"></select>
+        <input type="text" class="picker-custom" placeholder="Eigener Gegenstand …" style="display:none;">
+        <button type="button" class="picker-add-btn">+ Hinzufügen</button>
+      </div>
+      <ul class="picker-list"></ul>
+    </div>
+
+    <div class="picker-block" data-picker-block="bonimali">
+      <div class="section-label">Boni &amp; Mali</div>
+      <div class="picker-row">
+        <select class="picker-select"></select>
+        <input type="text" class="picker-custom" placeholder="Eigener Bonus/Malus …" style="display:none;">
+        <button type="button" class="picker-add-btn">+ Hinzufügen</button>
+      </div>
+      <ul class="picker-list"></ul>
+    </div>
+
+    <div class="picker-block" data-picker-block="status">
+      <div class="section-label">Statuseffekte</div>
+      <div class="picker-row">
+        <select class="picker-select"></select>
+        <input type="text" class="picker-custom" placeholder="Eigener Statuseffekt …" style="display:none;">
+        <button type="button" class="picker-add-btn">+ Hinzufügen</button>
+      </div>
+      <ul class="picker-list"></ul>
+    </div>
+
+    <div class="wheel-wrap">
+      <div class="section-label" style="text-align:center; border-bottom:none;">Fertigkeitenrad</div>
+      <svg viewBox="0 0 660 660" role="img" aria-label="Zwölfachsiges Fertigkeitenrad mit Würfelstufen von D4 bis D20" id="skillwheel">
+        <rect x="0" y="0" width="660" height="660" fill="transparent" id="wheel-hit" style="cursor:pointer;" />
+        <g>
+          <polygon points="340.0,300.0 360.0,305.4 374.6,320.0 380.0,340.0 374.6,360.0 360.0,374.6 340.0,380.0 320.0,374.6 305.4,360.0 300.0,340.0 305.4,320.0 320.0,305.4" class="wheel-ring" />
+          <polygon points="340.0,268.0 376.0,277.6 402.4,304.0 412.0,340.0 402.4,376.0 376.0,402.4 340.0,412.0 304.0,402.4 277.6,376.0 268.0,340.0 277.6,304.0 304.0,277.6" class="wheel-ring" />
+          <polygon points="340.0,236.0 392.0,249.9 430.1,288.0 444.0,340.0 430.1,392.0 392.0,430.1 340.0,444.0 288.0,430.1 249.9,392.0 236.0,340.0 249.9,288.0 288.0,249.9" class="wheel-ring" />
+          <polygon points="340.0,204.0 408.0,222.2 457.8,272.0 476.0,340.0 457.8,408.0 408.0,457.8 340.0,476.0 272.0,457.8 222.2,408.0 204.0,340.0 222.2,272.0 272.0,222.2" class="wheel-ring" />
+          <polygon points="340.0,172.0 424.0,194.5 485.5,256.0 508.0,340.0 485.5,424.0 424.0,485.5 340.0,508.0 256.0,485.5 194.5,424.0 172.0,340.0 194.5,256.0 256.0,194.5" class="wheel-ring" />
+          <polygon points="340.0,140.0 440.0,166.8 513.2,240.0 540.0,340.0 513.2,440.0 440.0,513.2 340.0,540.0 240.0,513.2 166.8,440.0 140.0,340.0 166.8,240.0 240.0,166.8" class="wheel-ring" />
+        </g>
+        <g>
+          <line x1="340" y1="340" x2="340.0" y2="140.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="440.0" y2="166.8" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="513.2" y2="240.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="540.0" y2="340.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="513.2" y2="440.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="440.0" y2="513.2" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="340.0" y2="540.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="240.0" y2="513.2" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="166.8" y2="440.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="140.0" y2="340.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="166.8" y2="240.0" class="wheel-spoke" />
+          <line x1="340" y1="340" x2="240.0" y2="166.8" class="wheel-spoke" />
+        </g>
+        <g id="wheel-plot"></g>
+        <g class="wheel-ringlabel-group">
+          <text x="350.4" y="301.4" class="wheel-ringlabel-grid">D4</text>
+          <text x="368.3" y="311.7" class="wheel-ringlabel-grid">D4</text>
+          <text x="378.6" y="329.6" class="wheel-ringlabel-grid">D4</text>
+          <text x="378.6" y="350.4" class="wheel-ringlabel-grid">D4</text>
+          <text x="368.3" y="368.3" class="wheel-ringlabel-grid">D4</text>
+          <text x="350.4" y="378.6" class="wheel-ringlabel-grid">D4</text>
+          <text x="329.6" y="378.6" class="wheel-ringlabel-grid">D4</text>
+          <text x="311.7" y="368.3" class="wheel-ringlabel-grid">D4</text>
+          <text x="301.4" y="350.4" class="wheel-ringlabel-grid">D4</text>
+          <text x="301.4" y="329.6" class="wheel-ringlabel-grid">D4</text>
+          <text x="311.7" y="311.7" class="wheel-ringlabel-grid">D4</text>
+          <text x="329.6" y="301.4" class="wheel-ringlabel-grid">D4</text>
+
+          <text x="358.6" y="270.5" class="wheel-ringlabel-grid">D6</text>
+          <text x="390.9" y="289.1" class="wheel-ringlabel-grid">D6</text>
+          <text x="409.5" y="321.4" class="wheel-ringlabel-grid">D6</text>
+          <text x="409.5" y="358.6" class="wheel-ringlabel-grid">D6</text>
+          <text x="390.9" y="390.9" class="wheel-ringlabel-grid">D6</text>
+          <text x="358.6" y="409.5" class="wheel-ringlabel-grid">D6</text>
+          <text x="321.4" y="409.5" class="wheel-ringlabel-grid">D6</text>
+          <text x="289.1" y="390.9" class="wheel-ringlabel-grid">D6</text>
+          <text x="270.5" y="358.6" class="wheel-ringlabel-grid">D6</text>
+          <text x="270.5" y="321.4" class="wheel-ringlabel-grid">D6</text>
+          <text x="289.1" y="289.1" class="wheel-ringlabel-grid">D6</text>
+          <text x="321.4" y="270.5" class="wheel-ringlabel-grid">D6</text>
+
+          <text x="366.9" y="239.5" class="wheel-ringlabel-grid">D8</text>
+          <text x="413.5" y="266.5" class="wheel-ringlabel-grid">D8</text>
+          <text x="440.5" y="313.1" class="wheel-ringlabel-grid">D8</text>
+          <text x="440.5" y="366.9" class="wheel-ringlabel-grid">D8</text>
+          <text x="413.5" y="413.5" class="wheel-ringlabel-grid">D8</text>
+          <text x="366.9" y="440.5" class="wheel-ringlabel-grid">D8</text>
+          <text x="313.1" y="440.5" class="wheel-ringlabel-grid">D8</text>
+          <text x="266.5" y="413.5" class="wheel-ringlabel-grid">D8</text>
+          <text x="239.5" y="366.9" class="wheel-ringlabel-grid">D8</text>
+          <text x="239.5" y="313.1" class="wheel-ringlabel-grid">D8</text>
+          <text x="266.5" y="266.5" class="wheel-ringlabel-grid">D8</text>
+          <text x="313.1" y="239.5" class="wheel-ringlabel-grid">D8</text>
+
+          <text x="375.2" y="208.6" class="wheel-ringlabel-grid">D10</text>
+          <text x="436.2" y="243.8" class="wheel-ringlabel-grid">D10</text>
+          <text x="471.4" y="304.8" class="wheel-ringlabel-grid">D10</text>
+          <text x="471.4" y="375.2" class="wheel-ringlabel-grid">D10</text>
+          <text x="436.2" y="436.2" class="wheel-ringlabel-grid">D10</text>
+          <text x="375.2" y="471.4" class="wheel-ringlabel-grid">D10</text>
+          <text x="304.8" y="471.4" class="wheel-ringlabel-grid">D10</text>
+          <text x="243.8" y="436.2" class="wheel-ringlabel-grid">D10</text>
+          <text x="208.6" y="375.2" class="wheel-ringlabel-grid">D10</text>
+          <text x="208.6" y="304.8" class="wheel-ringlabel-grid">D10</text>
+          <text x="243.8" y="243.8" class="wheel-ringlabel-grid">D10</text>
+          <text x="304.8" y="208.6" class="wheel-ringlabel-grid">D10</text>
+
+          <text x="383.5" y="177.7" class="wheel-ringlabel-grid">D12</text>
+          <text x="458.8" y="221.2" class="wheel-ringlabel-grid">D12</text>
+          <text x="502.3" y="296.5" class="wheel-ringlabel-grid">D12</text>
+          <text x="502.3" y="383.5" class="wheel-ringlabel-grid">D12</text>
+          <text x="458.8" y="458.8" class="wheel-ringlabel-grid">D12</text>
+          <text x="383.5" y="502.3" class="wheel-ringlabel-grid">D12</text>
+          <text x="296.5" y="502.3" class="wheel-ringlabel-grid">D12</text>
+          <text x="221.2" y="458.8" class="wheel-ringlabel-grid">D12</text>
+          <text x="177.7" y="383.5" class="wheel-ringlabel-grid">D12</text>
+          <text x="177.7" y="296.5" class="wheel-ringlabel-grid">D12</text>
+          <text x="221.2" y="221.2" class="wheel-ringlabel-grid">D12</text>
+          <text x="296.5" y="177.7" class="wheel-ringlabel-grid">D12</text>
+
+          <text x="391.8" y="146.8" class="wheel-ringlabel-grid">D20</text>
+          <text x="481.4" y="198.6" class="wheel-ringlabel-grid">D20</text>
+          <text x="533.2" y="288.2" class="wheel-ringlabel-grid">D20</text>
+          <text x="533.2" y="391.8" class="wheel-ringlabel-grid">D20</text>
+          <text x="481.4" y="481.4" class="wheel-ringlabel-grid">D20</text>
+          <text x="391.8" y="533.2" class="wheel-ringlabel-grid">D20</text>
+          <text x="288.2" y="533.2" class="wheel-ringlabel-grid">D20</text>
+          <text x="198.6" y="481.4" class="wheel-ringlabel-grid">D20</text>
+          <text x="146.8" y="391.8" class="wheel-ringlabel-grid">D20</text>
+          <text x="146.8" y="288.2" class="wheel-ringlabel-grid">D20</text>
+          <text x="198.6" y="198.6" class="wheel-ringlabel-grid">D20</text>
+          <text x="288.2" y="146.8" class="wheel-ringlabel-grid">D20</text>
+        </g>
+        <g>
+          <text x="340.0" y="96.0" class="wheel-axislabel" text-anchor="middle">Intelligenz</text>
+          <text x="462.0" y="128.7" class="wheel-axislabel" text-anchor="start">Aufmerksamkeit</text>
+          <text x="551.3" y="218.0" class="wheel-axislabel" text-anchor="start">Agilität</text>
+          <text x="584.0" y="340.0" class="wheel-axislabel" text-anchor="start">Können</text>
+          <text x="551.3" y="462.0" class="wheel-axislabel" text-anchor="start">Körperkraft</text>
+          <text x="462.0" y="551.3" class="wheel-axislabel" text-anchor="start">Finesse</text>
+          <text x="340.0" y="584.0" class="wheel-axislabel" text-anchor="middle">Geschicklichkeit</text>
+          <text x="218.0" y="551.3" class="wheel-axislabel" text-anchor="end">Koordination</text>
+          <text x="128.7" y="462.0" class="wheel-axislabel" text-anchor="end">Belastbarkeit</text>
+          <text x="96.0" y="340.0" class="wheel-axislabel" text-anchor="end">Seelenruhe</text>
+          <text x="128.7" y="218.0" class="wheel-axislabel" text-anchor="end">Charme</text>
+          <text x="218.0" y="128.7" class="wheel-axislabel" text-anchor="end">Empathie</text>
+        </g>
+      </svg>
+      <div class="wheel-caption">Klicke auf eine Achse, um die Würfelstufe zu setzen — Klick auf denselben Punkt löscht ihn wieder.</div>
+      <div style="text-align:center; margin-top:0.6rem;">
+        <button type="button" id="wheel-reset" class="wheel-reset-btn">Rad zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SEITE 2: HINTERGRUND ================= -->
+  <div class="sheet">
+    <div class="sheet-head">
+      <div>
+        <div class="eyebrow">Rondria · Charakterbogen</div>
+        <h1 class="sheet-title">Hintergrund</h1>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field"><label>Spezies</label><input type="text" data-field="spezies"></div>
+      <div class="field"><label>Heimatwelt</label><input type="text" data-field="heimatwelt"></div>
+      <div class="field"><label>Alter</label><input type="text" style="max-width:70px;" data-field="alter"></div>
+      <div class="field"><label>Geld</label><input type="text" style="max-width:90px;" data-field="geldHintergrund"></div>
+    </div>
+
+    <div class="block-gap">
+      <div class="section-label">Eigene Geschichte</div>
+      <textarea class="lined" rows="10" placeholder="Herkunft, prägende Ereignisse, wie die Figur zu dem wurde, was sie heute ist …" data-field="geschichte"></textarea>
+    </div>
+
+    <div class="block-gap">
+      <div class="section-label">Psychologisches Profil</div>
+      <textarea class="lined" rows="4" placeholder="Wesenszüge, Ängste, Antriebe, Beziehungen …" data-field="profil"></textarea>
+    </div>
+  </div>
+
+  <footer class="editor-note">
+    Ausfüllbarer Bogen — Eingaben bleiben nur während der Sitzung erhalten. Zum Drucken (Strg/Cmd + P) wird automatisch ein helles, tintensparendes Layout verwendet.
+  </footer>
+
+  <script>
+    (function(){
+      const CANTRIPS = [{"name": "Säureschwall", "effect": "1w6 Säureschaden, ab Stufe 3 2w6"}, {"name": "Klingenschutz", "effect": "Resistenz gg. Schnittschaden"}, {"name": "Eiskalte Hand", "effect": "1w4 Nekroseschaden, kein Heilen"}, {"name": "Tanzende Lichter", "effect": "Bis zu 4 Lichter bewegen"}, {"name": "Druidenwerk", "effect": "Kleine Naturtricks"}, {"name": "Eldritch Blast", "effect": "1w4+4 Kraftschaden, ab Stufe 5 zweiter Strahl"}, {"name": "Feuerpfeil", "effect": "1w4+4 Feuerschaden, ab Stufe 3 2w4+8"}, {"name": "Freunde", "effect": "Vorteil bei Interaktion mit einer Kreatur"}, {"name": "Führung", "effect": "+1w4 auf eine Fertigkeitsprobe"}, {"name": "Licht", "effect": "Objekt leuchtet hell 6 m"}, {"name": "Zauberhand", "effect": "Spektrale Hand manipuliert Objekte"}, {"name": "Reparieren", "effect": "Repariert kleinen Bruch/Riss"}, {"name": "Botschaft", "effect": "Flüstert Nachricht an ein Ziel"}, {"name": "Kleinere Illusion", "effect": "Erzeugt Bild oder Geräusch"}, {"name": "Giftsprühen", "effect": "1w6 Giftschaden"}, {"name": "Gaukelei", "effect": "Diverse magische Kleinigkeiten"}, {"name": "Feuer erzeugen", "effect": "Licht + Wurfangriff 1w8 Feuer"}, {"name": "Eisstrahl", "effect": "1w4 Eisschaden, verlangsamt Gegner"}, {"name": "Widerstand", "effect": "+1w4 auf Rettungswurf"}, {"name": "Heiliges Feuer", "effect": "1w8 Lichtschaden"}, {"name": "Shillelagh", "effect": "Knüppel/Stab wird zur Zauberwaffe, +1w6 mehr Schaden für 2 Runden"}, {"name": "Schockgriff", "effect": "1w6 Blitzschaden, keine Reaktionen"}, {"name": "Dornenpeitsche", "effect": "1w6 Wuchsschaden, zieht 3 m heran"}, {"name": "Wahrer Treffer", "effect": "Vorteil auf nächsten Angriff"}, {"name": "Bösartiger Spott", "effect": "1w4 Psychoschaden (+ Bonus je nach Witzigkeit), Nachteil auf nächsten Angriff"}, {"name": "Fesseln", "effect": "1w4 Schaden bei Treffer, Ziel kann sich einen Zug lang nicht bewegen"}, {"name": "Blitzbund", "effect": "1w4 Blitzschaden, kann im nächsten Zug als Nebenaktion erneut auf dasselbe Ziel gewirkt werden"}, {"name": "Rankenrüstung", "effect": "erhöht die Rüstungsklasse um 2, Rüstung ist leicht brennbar"}, {"name": "Sonnenstrahl", "effect": "1w4 Solarschaden, kann einmal im Zug als Nebenaktion erneut gewirkt werden"}, {"name": "Säurepfeil", "effect": "1w4+4 Säureschaden"}];
+      const SPELLS = [];
+      const FEATS = [{"group": "Körperliche Verbesserungen", "name": "Zäh wie Leder", "effect": "die maximalen TP erhöhen sich einmalig um 2 pro Charakterlevel"}, {"group": "Körperliche Verbesserungen", "name": "Eiserner Wille", "effect": "+1w4 auf alle Rettungswürfe gegen Belastbarkeit"}, {"group": "Körperliche Verbesserungen", "name": "Kampfreflexe", "effect": "+1 auf die Rüstungsklasse, solange keine schwere Rüstung getragen wird"}, {"group": "Körperliche Verbesserungen", "name": "Athletisch", "effect": "Vorteil bei Klettern, Springen und Schwimmen; Bewegungsreichweite +1,5 m"}, {"group": "Körperliche Verbesserungen", "name": "Nachtsicht", "effect": "sieht auch in völliger Dunkelheit in 9 m Radius (Graustufen)"}, {"group": "Körperliche Verbesserungen", "name": "Zähe Konstitution", "effect": "Vorteil bei Rettungswürfen gegen Gift und Krankheit"}, {"group": "Kampf-Fähigkeiten", "name": "Scharfschütze", "effect": "kein Nachteil bei Fernkampfangriffen auf große Distanz oder bei Deckung des Ziels"}, {"group": "Kampf-Fähigkeiten", "name": "Wuchtiger Angriff", "effect": "1x pro Zug: Angriff mit -2 auf den Trefferwurf um +1w6 Schaden verstärken"}, {"group": "Kampf-Fähigkeiten", "name": "Zweitwaffen-Kampf", "effect": "voller Attributsbonus auf Schaden auch mit der Nebenhand"}, {"group": "Kampf-Fähigkeiten", "name": "Gezielter Treffer", "effect": "1x pro Kampf: garantierter Treffer durch Ausnutzen einer Schwachstelle"}, {"group": "Magie & Zaubertricks", "name": "Zauberkundiger", "effect": "ein zusätzlicher Zaubertrick aus der allgemeinen Liste wird erlernt"}, {"group": "Magie & Zaubertricks", "name": "Ritual-Kenner", "effect": "ein bekannter Zauber kann als Ritual gewirkt werden (kein Ressourcenverbrauch, doppelte Wirkzeit)"}, {"group": "Magie & Zaubertricks", "name": "Konzentrationsmeister", "effect": "Vorteil bei Rettungswürfen zum Aufrechterhalten der Konzentration"}, {"group": "Soziales & Wahrnehmung", "name": "Sprachgewandt", "effect": "Vorteil bei Charme-Proben in Verhandlungen; eine zusätzliche Sprache"}, {"group": "Soziales & Wahrnehmung", "name": "Scharfe Sinne", "effect": "Vorteil bei Aufmerksamkeitsproben; kann nicht überrascht werden (außer bewusstlos)"}, {"group": "Soziales & Wahrnehmung", "name": "Menschenkenner", "effect": "erkennt durch kurze Beobachtung, ob eine Kreatur lügt (Vorteil auf die Probe)"}, {"group": "Vielseitigkeit", "name": "Attributstraining", "effect": "ein Attribut steigt um eine Würfelstufe, max. einmal pro Attribut über die Karriere"}, {"group": "Vielseitigkeit", "name": "Zähe Wiederkehr", "effect": "1x/Tag: bei 0 TP bleibt der Charakter stattdessen bei 1 TP"}, {"group": "Vielseitigkeit", "name": "Improvisationstalent", "effect": "1x pro Kampf eine sonst unmögliche Aktion ohne Nachteil ausführen"}, {"group": "Vielseitigkeit", "name": "Anführerqualität", "effect": "1x pro Kampf einem Verbündeten als Reaktion Vorteil auf dessen nächsten Wurf geben"}, {"group": "Roleplay & Hintergrund", "name": "Vertrauter Handwerker", "effect": "beherrscht ein Handwerk auf Expertenniveau; NSCs desselben Gewerbes begegnen ihm mit Respekt"}, {"group": "Roleplay & Hintergrund", "name": "Ruf voraus", "effect": "in einer gewählten Region bekannt — öffnet Türen, zieht aber auch Aufmerksamkeit an"}, {"group": "Roleplay & Hintergrund", "name": "Vertraute Erinnerung", "effect": "erinnert sich an eine prägende Begegnung, die als NSC-Kontakt/Plot-Hook auftaucht"}, {"group": "Roleplay & Hintergrund", "name": "Geheimsprache", "effect": "erlernt eine seltene oder verbotene Sprache/einen Geheimcode nach freier Wahl"}, {"group": "Roleplay & Hintergrund", "name": "Doppelleben", "effect": "pflegt eine zweite Identität; Vorteil beim Vorspielen dieser Person"}, {"group": "Roleplay & Hintergrund", "name": "Gönner", "effect": "eine einflussreiche Figur steht dem Charakter nahe und kann um Gefallen gebeten werden"}, {"group": "Roleplay & Hintergrund", "name": "Erzfeind", "effect": "hat einen persönlichen Widersacher — Story-Element ohne mechanischen Vorteil"}, {"group": "Roleplay & Hintergrund", "name": "Sammlerherz", "effect": "sammelt etwas Bestimmtes; Vorteil bei thematisch passenden Proben"}, {"group": "Roleplay & Hintergrund", "name": "Ehrenkodex", "effect": "folgt einem strikten Verhaltenskodex; 1x pro Sitzung Inspiration von der Spielleitung"}, {"group": "Roleplay & Hintergrund", "name": "Vielgereist", "effect": "kennt sich in einer Kultur/Region besonders gut aus; Vorteil bei sozialen/Wissensproben dort"}];
+      const GEAR = [{"group": "Finesse-Waffen", "name": "Dolch", "effect": "1w4 Schaden — leicht, werfbar"}, {"group": "Finesse-Waffen", "name": "Rapier", "effect": "1w6 Schaden — +1 Initiative"}, {"group": "Finesse-Waffen", "name": "Kurzschwert", "effect": "1w6 Schaden — leicht"}, {"group": "Finesse-Waffen", "name": "Krummsäbel", "effect": "1w8 Schaden — Vorteil gegen mehrere schwache Gegner"}, {"group": "Finesse-Waffen", "name": "Sai", "effect": "1w4 Schaden — kann gegnerische Waffen entwaffnen"}, {"group": "Finesse-Waffen", "name": "Peitsche", "effect": "1w4 Schaden — 4 m Reichweite, kein Nahkampf-Nachteil auf Distanz"}, {"group": "Können-Waffen", "name": "Langschwert", "effect": "1w8 Schaden — vielseitig (1w10 zweihändig)"}, {"group": "Können-Waffen", "name": "Streitaxt", "effect": "1w8 Schaden — vielseitig (1w10 zweihändig)"}, {"group": "Können-Waffen", "name": "Streitkolben", "effect": "1w6 Schaden — +1 Schaden gegen Untote"}, {"group": "Können-Waffen", "name": "Kriegshammer", "effect": "1w10 Schaden — schwer, -1 Initiative"}, {"group": "Können-Waffen", "name": "Großschwert", "effect": "2w6 Schaden — schwer, zweihändig"}, {"group": "Können-Waffen", "name": "Zweihandaxt", "effect": "2w6 Schaden — schwer, zweihändig"}, {"group": "Können-Waffen", "name": "Kriegssense", "effect": "1w10 Schaden — schwer, Reichweite 3 m"}, {"group": "Können-Waffen", "name": "Streitkeule", "effect": "1w6 Schaden — einfach zu erlernen, kein Malus für Ungeübte"}, {"group": "Koordinations-Waffen", "name": "Kurzbogen", "effect": "1w6 Schaden — Reichweite 30 m"}, {"group": "Koordinations-Waffen", "name": "Langbogen", "effect": "1w8 Schaden — Reichweite 45 m, Nachteil ohne Übung"}, {"group": "Koordinations-Waffen", "name": "Leichte Armbrust", "effect": "1w8 Schaden — Nachladen kostet Nebenaktion"}, {"group": "Koordinations-Waffen", "name": "Schwere Armbrust", "effect": "1w10 Schaden — Nachladen kostet volle Aktion, Nachteil im Nahkampf"}, {"group": "Koordinations-Waffen", "name": "Wurfmesser", "effect": "1w4 Schaden — Reichweite 6 m, Set aus 3"}, {"group": "Koordinations-Waffen", "name": "Schleuder", "effect": "1w4 Schaden — Reichweite 12 m, Munition leicht zu finden"}, {"group": "Koordinations-Waffen", "name": "Speer (geworfen)", "effect": "1w6 Schaden — Reichweite 9 m, auch als Nahkampfwaffe nutzbar"}, {"group": "Leichte Rüstung", "name": "Reisekleidung", "effect": "+0 Rüstungsklasse — keine Deckung, rein kosmetisch"}, {"group": "Leichte Rüstung", "name": "Gepolsterte Kleidung", "effect": "+1 Rüstungsklasse — leise, kein Malus beim Schleichen"}, {"group": "Leichte Rüstung", "name": "Lederrüstung", "effect": "+2 Rüstungsklasse — Standard für Waldläufer, Barden, Hexenmeister"}, {"group": "Leichte Rüstung", "name": "Genietete Lederrüstung", "effect": "+3 Rüstungsklasse — etwas schwerer, minimal lauter"}, {"group": "Mittlere Rüstung", "name": "Kettenhemd", "effect": "+4 Rüstungsklasse — Standard für Krieger, Kleriker"}, {"group": "Mittlere Rüstung", "name": "Schuppenpanzer", "effect": "+5 Rüstungsklasse — Nachteil bei Schleichen"}, {"group": "Mittlere Rüstung", "name": "Brustpanzer", "effect": "+5 Rüstungsklasse — kein Nachteil bei Schleichen, aber teuer"}, {"group": "Mittlere Rüstung", "name": "Halbplatte", "effect": "+6 Rüstungsklasse — Nachteil auf Finesse-Waffenproben ohne Training"}, {"group": "Schwere Rüstung", "name": "Kettenpanzer", "effect": "+6 Rüstungsklasse — reduziert Bewegungsreichweite um 1,5 m ohne Training"}, {"group": "Schwere Rüstung", "name": "Plattenpanzer", "effect": "+8 Rüstungsklasse — reduziert Bewegungsreichweite um 3 m ohne Training, laut"}, {"group": "Schwere Rüstung", "name": "Volle Ritterrüstung", "effect": "+9 Rüstungsklasse — nur mit „Novize Schwerer Rüstung“ ohne Nachteil tragbar"}, {"group": "Schilde", "name": "Rundschild", "effect": "+1 Rüstungsklasse — leicht, kein Malus"}, {"group": "Schilde", "name": "Turmschild", "effect": "+2 Rüstungsklasse — Nachteil auf Finesse-Waffenproben mit Nebenhand"}];
+      const BONI_MALI = [{"group": "Körperbau", "name": "Hünenhaft", "effect": "+1w4 auf Körperkraft-Proben und Trageleistung"}, {"group": "Körperbau", "name": "Zierlich", "effect": "-1w4 auf Körperkraft-Proben"}, {"group": "Reaktionsfähigkeit", "name": "Blitzschnell", "effect": "Vorteil auf Initiative"}, {"group": "Reaktionsfähigkeit", "name": "Bedächtig", "effect": "Nachteil auf Initiative"}, {"group": "Kampfstil", "name": "Furchtlos", "effect": "Immunität gegen Angsteffekte"}, {"group": "Kampfstil", "name": "Vorsichtig", "effect": "Nachteil auf Rettungswürfe gegen Angst"}, {"group": "Soziales", "name": "Charismatisch", "effect": "Vorteil bei Überzeugen und Verhandeln"}, {"group": "Soziales", "name": "Furchteinflößend", "effect": "Vorteil bei Einschüchtern, aber Nachteil bei Überzeugen"}, {"group": "Gesundheit", "name": "Zäh", "effect": "+2 maximale TP pro Level"}, {"group": "Gesundheit", "name": "Anfällig", "effect": "-1 maximale TP pro Level"}, {"group": "Sinne", "name": "Adlerauge", "effect": "Vorteil bei Wahrnehmungsproben auf Distanz"}, {"group": "Sinne", "name": "Übervorsichtig", "effect": "Nachteil bei Wahrnehmung auf Distanz"}, {"group": "Magieaffinität", "name": "Arkane Ader", "effect": "+1 auf den Schadenswurf aller Zaubertricks"}, {"group": "Magieaffinität", "name": "Magieresistent", "effect": "Vorteil bei Rettungswürfen gegen gegnerische Zauber, aber -1 auf eigene Zaubertrick-Schäden"}, {"group": "Temperament", "name": "Kühler Kopf", "effect": "Vorteil bei Rettungswürfen gegen Provokation und Wutanfälle-Auslöser"}, {"group": "Temperament", "name": "Hitzkopf", "effect": "bei kritischem Treffer: Belastbarkeits-RW oder nächster Angriff ungestüm (Vorteil Trefferwurf, Nachteil RK)"}, {"group": "Belastbarkeit vs. Beweglichkeit", "name": "Standfest", "effect": "kann nicht durch Stoßeffekte umgeworfen oder verschoben werden"}, {"group": "Belastbarkeit vs. Beweglichkeit", "name": "Flink", "effect": "+1,5 m Bewegungsreichweite, aber doppelte Verschiebung durch Stoßeffekte"}, {"group": "Loyalität & Moral", "name": "Unerschütterliche Treue", "effect": "Vorteil bei RW gegen Bezauberung/mentale Kontrolle, solange Verbündete nahe sind"}, {"group": "Loyalität & Moral", "name": "Eigenbrötler", "effect": "Nachteil bei RW gegen Bezauberung solange Verbündete nahe sind"}, {"group": "Vergangenheit", "name": "Bekannter Held/Heldin", "effect": "Vorteil bei ersten Eindrücken in Zivilisation"}, {"group": "Vergangenheit", "name": "Gesuchte Person", "effect": "Nachteil bei Kontakt mit Autoritäten, aber Vorteil bei Kontakt mit der Unterwelt"}];
+      const STATUS = [{"name": "Betäubt", "effect": "keine Aktionen/Nebenaktionen; Angriffe gegen die Kreatur haben Vorteil. Endet meist nach 1 Zug oder Belastbarkeits-RW"}, {"name": "Verängstigt", "effect": "kann sich der Angstquelle nicht nähern, Nachteil auf Angriffs-/Fertigkeitsproben solange sichtbar. Seelenruhe-RW schüttelt es ab"}, {"name": "Festgehalten", "effect": "Bewegungsreichweite 0, Angriffe gegen die Kreatur im Vorteil, eigene im Nachteil. Endet durch Geschicklichkeits-/Körperkraft-RW"}, {"name": "Verlangsamt", "effect": "Bewegungsreichweite halbiert, kein Bonus-Angriff möglich. Meist 1–3 Züge begrenzt"}, {"name": "Geblendet", "effect": "kann nichts sehen, automatisches Versagen bei sehkraftabhängigen Proben, Angriffe gegen die Kreatur im Vorteil, eigene im Nachteil"}, {"name": "Vergiftet", "effect": "Nachteil auf Angriffs-/Fertigkeitsproben, oft 1w4 Giftschaden/Zug. Endet durch Belastbarkeits-RW"}, {"name": "Gelähmt", "effect": "kann sich nicht bewegen/handeln, automatisches Versagen bei Geschicklichkeits-/Körperkraft-RW, Nahkampftreffer gelten automatisch als kritisch"}, {"name": "Bewusstlos", "effect": "wie gelähmt, zusätzlich liegend und ohne Umgebungswahrnehmung"}, {"name": "Unsichtbar", "effect": "kann nicht ohne magische Hilfsmittel gesehen werden, Vorteil auf eigene Angriffe, Angriffe gegen die Kreatur im Nachteil"}, {"name": "Bezaubert", "effect": "kann die bezaubernde Kreatur nicht angreifen/schädigen; diese hat Vorteil bei sozialen Proben gegen sie"}, {"name": "Erschöpft (Stufe 1)", "effect": "Nachteil auf alle Proben"}, {"name": "Erschöpft (Stufe 2)", "effect": "Bewegungsreichweite halbiert"}, {"name": "Erschöpft (Stufe 3)", "effect": "Nachteil auf Angriffs- und Rettungswürfe"}, {"name": "Erschöpft (Stufe 4)", "effect": "maximale TP halbiert"}, {"name": "Erschöpft (Stufe 5)", "effect": "Bewegungsreichweite 0. Baut sich durch lange Rast schrittweise ab"}, {"name": "Niedergeschlagen (liegend)", "effect": "Bewegung kostet doppelt, Nahkampf gegen die Kreatur im Vorteil, Fernkampf gegen sie im Nachteil; eigene Angriffe im Nachteil bis Aufstehen"}, {"name": "Entwaffnet", "effect": "Waffe fällt zu Boden, Aufheben kostet Nebenaktion, kein Waffenschaden möglich"}, {"name": "Verstummt", "effect": "kann keine Zaubertricks/Zauber mit verbaler Komponente wirken"}, {"name": "Gefesselt", "effect": "Bewegungsreichweite 0, automatisches Versagen bei Geschicklichkeits-RW, Angriffe gegen die Kreatur im Vorteil"}, {"name": "Provoziert", "effect": "muss die provozierende Kreatur im nächsten Zug angreifen, sofern möglich"}, {"name": "Markiert", "effect": "ein Angreifer hat dauerhaft Vorteil auf Angriffswürfe gegen die markierte Kreatur"}, {"name": "Nekrotisch geschwächt", "effect": "kann nicht geheilt werden, bis der Effekt endet"}, {"name": "Inspiriert", "effect": "kann einmalig einen Bonuswürfel auf einen beliebigen Wurf addieren, bevor der Effekt verfällt"}, {"name": "Brennend (Feuer)", "effect": "1w6 Feuerschaden zu Beginn jedes eigenen Zuges, endet durch Wasser/Löschen. Brennbare Rüstung verlängert um 1 Zug"}, {"name": "Eingefroren (Eis)", "effect": "Bewegung 0, Nachteil auf nächsten RW gegen Wuchtschaden. Endet durch Belastbarkeits-RW oder Feuerschaden"}, {"name": "Durchnässt (Wasser)", "effect": "kein eigener Schaden, aber anfällig für doppelten Elektroschaden. Endet nach 1–2 Zügen oder durch Hitze"}, {"name": "Statisch geladen (Elektro)", "effect": "1 Zug keine Reaktionen möglich; erneuter Elektro-Treffer verursacht +1w4 Bonusschaden. Endet automatisch nach 1 Zug"}, {"name": "Verätzt (Säure)", "effect": "Rüstungsklasse sinkt um 1 für die Dauer, kumulativ bis -3. Reparatur außerhalb des Kampfes setzt zurück"}, {"name": "Versengt (Licht/Heilig)", "effect": "Untote/körperlose Kreaturen haben zusätzlich 1 Zug Nachteil auf alle Proben"}, {"name": "Umschlungen (Natur/Wuchs)", "effect": "wie Festgehalten, endet automatisch nach 2 Zügen; durch Feuerschaden sofort zerstörbar"}, {"name": "Korrumpiert (Nekrose)", "effect": "kein Heilen durch Zauber/Fähigkeiten möglich, meist bis Ende des nächsten Zuges des Ziels"}, {"name": "Verwirrt (Psycho)", "effect": "zu Beginn des Zuges 50% Chance, dass die Aktion gegen ein zufälliges Ziel gerichtet wird. Seelenruhe-RW schüttelt es ab"}];
+      
+
+      // ---------- Auswahllisten (Zaubertricks, Zauber, Fertigkeiten, Ausrüstung, Boni & Mali, Statuseffekte) ----------
+      const pickerState = {};
+
+      const pickerConfigs = {
+        zaubertricks: { data: CANTRIPS, groupBy: null,   fields: ['name','effect'] },
+        zauber:       { data: SPELLS,   groupBy: null,   fields: ['name','effect'] },
+        fertigkeiten: { data: FEATS,    groupBy: 'group',fields: ['name','effect'] },
+        ausruestung:  { data: GEAR,     groupBy: 'group',fields: ['name','effect'] },
+        bonimali:     { data: BONI_MALI,groupBy: 'group',fields: ['name','effect'] },
+        status:       { data: STATUS,   groupBy: null,   fields: ['name','effect'] },
+      };
+
+      function formatEntry(item){
+        return item.name + ' – ' + item.effect;
+      }
+
+      function buildSelectOptions(select, config){
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = config.data.length ? 'Bitte wählen …' : 'Noch keine Liste hinterlegt';
+        select.appendChild(placeholder);
+
+        if (config.groupBy){
+          const groups = {};
+          config.data.forEach((item, idx) => {
+            const g = item[config.groupBy];
+            if (!groups[g]) groups[g] = [];
+            groups[g].push(idx);
+          });
+          Object.keys(groups).forEach(g => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = g;
+            groups[g].forEach(idx => {
+              const opt = document.createElement('option');
+              opt.value = idx;
+              opt.textContent = config.data[idx].name;
+              optgroup.appendChild(opt);
+            });
+            select.appendChild(optgroup);
+          });
+        } else {
+          config.data.forEach((item, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = item.name;
+            select.appendChild(opt);
+          });
+        }
+
+        const customOpt = document.createElement('option');
+        customOpt.value = '__custom__';
+        customOpt.textContent = 'Eigener Eintrag …';
+        select.appendChild(customOpt);
+      }
+
+      function renderPickerList(key){
+        const block = document.querySelector(`[data-picker-block="${key}"]`);
+        const ul = block.querySelector('.picker-list');
+        const items = pickerState[key];
+        ul.innerHTML = '';
+        if (!items.length){
+          const li = document.createElement('li');
+          li.className = 'picker-empty';
+          li.style.border = 'none';
+          li.style.background = 'none';
+          li.style.padding = '0';
+          li.textContent = 'Noch nichts hinzugefügt.';
+          ul.appendChild(li);
+          return;
+        }
+        items.forEach((text, idx) => {
+          const li = document.createElement('li');
+          const span = document.createElement('span');
+          span.className = 'picker-item-text';
+          span.textContent = text;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'picker-remove-btn';
+          btn.textContent = '✕';
+          btn.addEventListener('click', () => {
+            pickerState[key].splice(idx, 1);
+            renderPickerList(key);
+          });
+          li.appendChild(span);
+          li.appendChild(btn);
+          ul.appendChild(li);
+        });
+      }
+
+      function initPicker(key, config){
+        pickerState[key] = [];
+        const block = document.querySelector(`[data-picker-block="${key}"]`);
+        const select = block.querySelector('.picker-select');
+        const custom = block.querySelector('.picker-custom');
+        const addBtn = block.querySelector('.picker-add-btn');
+
+        buildSelectOptions(select, config);
+
+        select.addEventListener('change', () => {
+          if (select.value === '__custom__'){
+            custom.style.display = '';
+            custom.focus();
+          } else {
+            custom.style.display = 'none';
+            custom.value = '';
+          }
+        });
+
+        function addCurrent(){
+          let text = '';
+          if (select.value === '__custom__'){
+            text = custom.value.trim();
+            if (!text) return;
+            custom.value = '';
+          } else if (select.value !== ''){
+            const item = config.data[parseInt(select.value, 10)];
+            text = formatEntry(item);
+          } else {
+            return;
+          }
+          pickerState[key].push(text);
+          renderPickerList(key);
+        }
+
+        addBtn.addEventListener('click', addCurrent);
+        custom.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter'){ e.preventDefault(); addCurrent(); }
+        });
+
+        renderPickerList(key);
+      }
+
+      Object.keys(pickerConfigs).forEach(key => initPicker(key, pickerConfigs[key]));
+
+      const CX = 340, CY = 340;
+      const ringRadii = [0, 40, 72, 104, 136, 168, 200];
+      const ringNames = ['—', 'D4', 'D6', 'D8', 'D10', 'D12', 'D20'];
+      const skillValues = new Array(12).fill(0);
+
+      const svg = document.getElementById('skillwheel');
+      const hit = document.getElementById('wheel-hit');
+      const plot = document.getElementById('wheel-plot');
+      const resetBtn = document.getElementById('wheel-reset');
+
+      function axisPoint(i, r){
+        const ang = (-90 + i * 30) * Math.PI / 180;
+        return [CX + r * Math.cos(ang), CY + r * Math.sin(ang)];
+      }
+
+      function render(){
+        while (plot.firstChild) plot.removeChild(plot.firstChild);
+
+        const pts = [];
+        for (let i = 0; i < 12; i++){
+          pts.push(axisPoint(i, ringRadii[skillValues[i]]));
+        }
+
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', pts.map(p => p.join(',')).join(' '));
+        poly.setAttribute('class', 'wheel-plot-fill');
+        plot.appendChild(poly);
+
+        pts.forEach((p, i) => {
+          if (skillValues[i] > 0){
+            const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dot.setAttribute('cx', p[0]);
+            dot.setAttribute('cy', p[1]);
+            dot.setAttribute('r', 4.5);
+            dot.setAttribute('class', 'wheel-plot-dot');
+            plot.appendChild(dot);
+          }
+        });
+      }
+
+      function svgPoint(evt){
+        const pt = svg.createSVGPoint();
+        pt.x = evt.clientX;
+        pt.y = evt.clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+      }
+
+      hit.addEventListener('click', (evt) => {
+        const loc = svgPoint(evt);
+        const dx = loc.x - CX, dy = loc.y - CY;
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const axisAngle = (angle + 90 + 360) % 360;
+        const axisIndex = Math.round(axisAngle / 30) % 12;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        let nearest = 0, best = Infinity;
+        ringRadii.forEach((r, idx) => {
+          const d = Math.abs(dist - r);
+          if (d < best){ best = d; nearest = idx; }
+        });
+
+        skillValues[axisIndex] = (skillValues[axisIndex] === nearest) ? 0 : nearest;
+        render();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        for (let i = 0; i < 12; i++) skillValues[i] = 0;
+        render();
+      });
+
+      render();
+
+      // ---------- Speichern / Laden ----------
+      const saveBtn = document.getElementById('btn-save');
+      const loadInput = document.getElementById('file-load');
+      const statusEl = document.getElementById('save-status');
+
+      function showStatus(msg){
+        statusEl.textContent = msg;
+        setTimeout(() => { if (statusEl.textContent === msg) statusEl.textContent = ''; }, 3500);
+      }
+
+      function collectData(){
+        const data = {};
+        document.querySelectorAll('[data-field]').forEach(el => {
+          data[el.dataset.field] = el.value;
+        });
+        data.skillValues = skillValues.slice();
+        data.picks = {};
+        Object.keys(pickerState).forEach(key => {
+          data.picks[key] = pickerState[key].slice();
+        });
+        return data;
+      }
+
+      function applyData(data){
+        document.querySelectorAll('[data-field]').forEach(el => {
+          if (data[el.dataset.field] !== undefined) el.value = data[el.dataset.field];
+        });
+        if (Array.isArray(data.skillValues)){
+          for (let i = 0; i < 12; i++){
+            const v = data.skillValues[i];
+            skillValues[i] = (typeof v === 'number' && v >= 0 && v <= 6) ? v : 0;
+          }
+          render();
+        }
+        if (data.picks){
+          Object.keys(pickerState).forEach(key => {
+            if (Array.isArray(data.picks[key])){
+              pickerState[key] = data.picks[key].slice();
+              renderPickerList(key);
+            }
+          });
+        }
+      }
+
+      saveBtn.addEventListener('click', () => {
+        const data = collectData();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const nameBase = (data.spezies || document.querySelectorAll('[data-field]')[0].value || 'charakter')
+          .trim().toLowerCase().replace(/[^a-z0-9äöüß]+/gi, '_') || 'charakter';
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'rondria_' + nameBase + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus('Gespeichert als Datei.');
+      });
+
+      loadInput.addEventListener('change', (evt) => {
+        const file = evt.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try{
+            const data = JSON.parse(e.target.result);
+            applyData(data);
+            showStatus('Charakter geladen.');
+          }catch(err){
+            showStatus('Datei konnte nicht gelesen werden.');
+          }
+        };
+        reader.readAsText(file);
+        loadInput.value = '';
+      });
+    })();
+  </script>
+
+</body>
+</html>
