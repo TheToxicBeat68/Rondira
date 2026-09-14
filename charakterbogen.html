@@ -708,6 +708,33 @@
 
   <script>
     (function(){
+      var autoSaveTimer = null;
+      const LOCAL_STORAGE_KEY = 'rondria-charakterbogen';
+
+      function scheduleAutoSave(){
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => autoSave(), 400);
+      }
+      function autoSave(){
+        try{
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(collectData()));
+        }catch(e){ /* Speicher nicht verfügbar (z. B. privater Modus) — kein Problem, nur kein Auto-Save */ }
+      }
+      function autoLoadOnStart(){
+        try{
+          const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (raw){
+            applyData(JSON.parse(raw));
+          }
+        }catch(e){ /* beschädigte oder fehlende Daten ignorieren */ }
+      }
+      document.addEventListener('input', (e) => {
+        if (e.target.closest('[data-field]')) scheduleAutoSave();
+      });
+      document.addEventListener('change', (e) => {
+        if (e.target.closest('[data-field]')) scheduleAutoSave();
+      });
+
       const CANTRIPS = [{"name": "Säureschwall", "effect": "1w6 Säureschaden, ab Stufe 3 2w6"}, {"name": "Klingenschutz", "effect": "Resistenz gg. Schnittschaden"}, {"name": "Eiskalte Hand", "effect": "1w4 Nekroseschaden, kein Heilen"}, {"name": "Tanzende Lichter", "effect": "Bis zu 4 Lichter bewegen"}, {"name": "Druidenwerk", "effect": "Kleine Naturtricks"}, {"name": "Eldritch Blast", "effect": "1w4+4 Kraftschaden, ab Stufe 5 zweiter Strahl"}, {"name": "Feuerpfeil", "effect": "1w4+4 Feuerschaden, ab Stufe 3 2w4+8"}, {"name": "Freunde", "effect": "Vorteil bei Interaktion mit einer Kreatur"}, {"name": "Führung", "effect": "+1w4 auf eine Fertigkeitsprobe"}, {"name": "Licht", "effect": "Objekt leuchtet hell 6 m"}, {"name": "Zauberhand", "effect": "Spektrale Hand manipuliert Objekte"}, {"name": "Reparieren", "effect": "Repariert kleinen Bruch/Riss"}, {"name": "Botschaft", "effect": "Flüstert Nachricht an ein Ziel"}, {"name": "Kleinere Illusion", "effect": "Erzeugt Bild oder Geräusch"}, {"name": "Giftsprühen", "effect": "1w6 Giftschaden"}, {"name": "Gaukelei", "effect": "Diverse magische Kleinigkeiten"}, {"name": "Feuer erzeugen", "effect": "Licht + Wurfangriff 1w8 Feuer"}, {"name": "Eisstrahl", "effect": "1w4 Eisschaden, verlangsamt Gegner"}, {"name": "Widerstand", "effect": "+1w4 auf Rettungswurf"}, {"name": "Heiliges Feuer", "effect": "1w8 Lichtschaden"}, {"name": "Shillelagh", "effect": "Knüppel/Stab wird zur Zauberwaffe, +1w6 mehr Schaden für 2 Runden"}, {"name": "Schockgriff", "effect": "1w6 Blitzschaden, keine Reaktionen"}, {"name": "Dornenpeitsche", "effect": "1w6 Wuchsschaden, zieht 3 m heran"}, {"name": "Wahrer Treffer", "effect": "Vorteil auf nächsten Angriff"}, {"name": "Bösartiger Spott", "effect": "1w4 Psychoschaden (+ Bonus je nach Witzigkeit), Nachteil auf nächsten Angriff"}, {"name": "Fesseln", "effect": "1w4 Schaden bei Treffer, Ziel kann sich einen Zug lang nicht bewegen"}, {"name": "Blitzbund", "effect": "1w4 Blitzschaden, kann im nächsten Zug als Nebenaktion erneut auf dasselbe Ziel gewirkt werden"}, {"name": "Rankenrüstung", "effect": "erhöht die Rüstungsklasse um 2, Rüstung ist leicht brennbar"}, {"name": "Sonnenstrahl", "effect": "1w4 Solarschaden, kann einmal im Zug als Nebenaktion erneut gewirkt werden"}, {"name": "Säurepfeil", "effect": "1w4+4 Säureschaden"}];
       const SPELLS = [];
       const FEATS = [{"group": "Körperliche Verbesserungen", "name": "Zäh wie Leder", "effect": "die maximalen TP erhöhen sich einmalig um 2 pro Charakterlevel"}, {"group": "Körperliche Verbesserungen", "name": "Eiserner Wille", "effect": "+1w4 auf alle Rettungswürfe gegen Belastbarkeit"}, {"group": "Körperliche Verbesserungen", "name": "Kampfreflexe", "effect": "+1 auf die Rüstungsklasse, solange keine schwere Rüstung getragen wird"}, {"group": "Körperliche Verbesserungen", "name": "Athletisch", "effect": "Vorteil bei Klettern, Springen und Schwimmen; Bewegungsreichweite +1,5 m"}, {"group": "Körperliche Verbesserungen", "name": "Nachtsicht", "effect": "sieht auch in völliger Dunkelheit in 9 m Radius (Graustufen)"}, {"group": "Körperliche Verbesserungen", "name": "Zähe Konstitution", "effect": "Vorteil bei Rettungswürfen gegen Gift und Krankheit"}, {"group": "Kampf-Fähigkeiten", "name": "Scharfschütze", "effect": "kein Nachteil bei Fernkampfangriffen auf große Distanz oder bei Deckung des Ziels"}, {"group": "Kampf-Fähigkeiten", "name": "Wuchtiger Angriff", "effect": "1x pro Zug: Angriff mit -2 auf den Trefferwurf um +1w6 Schaden verstärken"}, {"group": "Kampf-Fähigkeiten", "name": "Zweitwaffen-Kampf", "effect": "voller Attributsbonus auf Schaden auch mit der Nebenhand"}, {"group": "Kampf-Fähigkeiten", "name": "Gezielter Treffer", "effect": "1x pro Kampf: garantierter Treffer durch Ausnutzen einer Schwachstelle"}, {"group": "Magie & Zaubertricks", "name": "Zauberkundiger", "effect": "ein zusätzlicher Zaubertrick aus der allgemeinen Liste wird erlernt"}, {"group": "Magie & Zaubertricks", "name": "Ritual-Kenner", "effect": "ein bekannter Zauber kann als Ritual gewirkt werden (kein Ressourcenverbrauch, doppelte Wirkzeit)"}, {"group": "Magie & Zaubertricks", "name": "Konzentrationsmeister", "effect": "Vorteil bei Rettungswürfen zum Aufrechterhalten der Konzentration"}, {"group": "Soziales & Wahrnehmung", "name": "Sprachgewandt", "effect": "Vorteil bei Charme-Proben in Verhandlungen; eine zusätzliche Sprache"}, {"group": "Soziales & Wahrnehmung", "name": "Scharfe Sinne", "effect": "Vorteil bei Aufmerksamkeitsproben; kann nicht überrascht werden (außer bewusstlos)"}, {"group": "Soziales & Wahrnehmung", "name": "Menschenkenner", "effect": "erkennt durch kurze Beobachtung, ob eine Kreatur lügt (Vorteil auf die Probe)"}, {"group": "Vielseitigkeit", "name": "Attributstraining", "effect": "ein Attribut steigt um eine Würfelstufe, max. einmal pro Attribut über die Karriere"}, {"group": "Vielseitigkeit", "name": "Zähe Wiederkehr", "effect": "1x/Tag: bei 0 TP bleibt der Charakter stattdessen bei 1 TP"}, {"group": "Vielseitigkeit", "name": "Improvisationstalent", "effect": "1x pro Kampf eine sonst unmögliche Aktion ohne Nachteil ausführen"}, {"group": "Vielseitigkeit", "name": "Anführerqualität", "effect": "1x pro Kampf einem Verbündeten als Reaktion Vorteil auf dessen nächsten Wurf geben"}, {"group": "Roleplay & Hintergrund", "name": "Vertrauter Handwerker", "effect": "beherrscht ein Handwerk auf Expertenniveau; NSCs desselben Gewerbes begegnen ihm mit Respekt"}, {"group": "Roleplay & Hintergrund", "name": "Ruf voraus", "effect": "in einer gewählten Region bekannt — öffnet Türen, zieht aber auch Aufmerksamkeit an"}, {"group": "Roleplay & Hintergrund", "name": "Vertraute Erinnerung", "effect": "erinnert sich an eine prägende Begegnung, die als NSC-Kontakt/Plot-Hook auftaucht"}, {"group": "Roleplay & Hintergrund", "name": "Geheimsprache", "effect": "erlernt eine seltene oder verbotene Sprache/einen Geheimcode nach freier Wahl"}, {"group": "Roleplay & Hintergrund", "name": "Doppelleben", "effect": "pflegt eine zweite Identität; Vorteil beim Vorspielen dieser Person"}, {"group": "Roleplay & Hintergrund", "name": "Gönner", "effect": "eine einflussreiche Figur steht dem Charakter nahe und kann um Gefallen gebeten werden"}, {"group": "Roleplay & Hintergrund", "name": "Erzfeind", "effect": "hat einen persönlichen Widersacher — Story-Element ohne mechanischen Vorteil"}, {"group": "Roleplay & Hintergrund", "name": "Sammlerherz", "effect": "sammelt etwas Bestimmtes; Vorteil bei thematisch passenden Proben"}, {"group": "Roleplay & Hintergrund", "name": "Ehrenkodex", "effect": "folgt einem strikten Verhaltenskodex; 1x pro Sitzung Inspiration von der Spielleitung"}, {"group": "Roleplay & Hintergrund", "name": "Vielgereist", "effect": "kennt sich in einer Kultur/Region besonders gut aus; Vorteil bei sozialen/Wissensproben dort"}];
@@ -933,36 +960,6 @@
         statusEl.textContent = msg;
         setTimeout(() => { if (statusEl.textContent === msg) statusEl.textContent = ''; }, 3500);
       }
-
-      const LOCAL_STORAGE_KEY = 'rondria-charakterbogen';
-
-      function autoSave(){
-        try{
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(collectData()));
-        }catch(e){ /* Speicher nicht verfügbar (z. B. privater Modus) — kein Problem, nur kein Auto-Save */ }
-      }
-
-      function autoLoadOnStart(){
-        try{
-          const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-          if (raw){
-            applyData(JSON.parse(raw));
-          }
-        }catch(e){ /* beschädigte oder fehlende Daten ignorieren */ }
-      }
-
-      let autoSaveTimer = null;
-      function scheduleAutoSave(){
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(autoSave, 400);
-      }
-
-      document.addEventListener('input', (e) => {
-        if (e.target.closest('[data-field]')) scheduleAutoSave();
-      });
-      document.addEventListener('change', (e) => {
-        if (e.target.closest('[data-field]')) scheduleAutoSave();
-      });
 
       function collectData(){
         const data = {};
