@@ -453,6 +453,7 @@
     </div>
     <div class="toolbar-actions">
       <span class="save-status" id="save-status"></span>
+      <button type="button" id="btn-reset" class="toolbar-btn">Neuer Charakter</button>
       <label class="toolbar-btn" for="file-load">Laden</label>
       <input type="file" id="file-load" accept="application/json" style="display:none;">
       <button type="button" id="btn-save" class="toolbar-btn toolbar-btn-primary">Speichern</button>
@@ -702,7 +703,7 @@
   </div>
 
   <footer class="editor-note">
-    Ausfüllbarer Bogen — Eingaben bleiben nur während der Sitzung erhalten. Zum Drucken (Strg/Cmd + P) wird automatisch ein helles, tintensparendes Layout verwendet.
+    Ausfüllbarer Bogen — Eingaben werden automatisch in diesem Browser gespeichert und bleiben auch nach dem Schließen der Seite erhalten. Für einen anderen Browser/Rechner oder zum Sichern: „Speichern" nutzen. Zum Drucken (Strg/Cmd + P) wird automatisch ein helles, tintensparendes Layout verwendet.
   </footer>
 
   <script>
@@ -774,6 +775,7 @@
         const block = document.querySelector(`[data-picker-block="${key}"]`);
         const ul = block.querySelector('.picker-list');
         const items = pickerState[key];
+        scheduleAutoSave();
         ul.innerHTML = '';
         if (!items.length){
           const li = document.createElement('li');
@@ -866,6 +868,7 @@
 
       function render(){
         while (plot.firstChild) plot.removeChild(plot.firstChild);
+        scheduleAutoSave();
 
         const pts = [];
         for (let i = 0; i < 12; i++){
@@ -931,6 +934,36 @@
         setTimeout(() => { if (statusEl.textContent === msg) statusEl.textContent = ''; }, 3500);
       }
 
+      const LOCAL_STORAGE_KEY = 'rondria-charakterbogen';
+
+      function autoSave(){
+        try{
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(collectData()));
+        }catch(e){ /* Speicher nicht verfügbar (z. B. privater Modus) — kein Problem, nur kein Auto-Save */ }
+      }
+
+      function autoLoadOnStart(){
+        try{
+          const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (raw){
+            applyData(JSON.parse(raw));
+          }
+        }catch(e){ /* beschädigte oder fehlende Daten ignorieren */ }
+      }
+
+      let autoSaveTimer = null;
+      function scheduleAutoSave(){
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSave, 400);
+      }
+
+      document.addEventListener('input', (e) => {
+        if (e.target.closest('[data-field]')) scheduleAutoSave();
+      });
+      document.addEventListener('change', (e) => {
+        if (e.target.closest('[data-field]')) scheduleAutoSave();
+      });
+
       function collectData(){
         const data = {};
         document.querySelectorAll('[data-field]').forEach(el => {
@@ -989,6 +1022,7 @@
           try{
             const data = JSON.parse(e.target.result);
             applyData(data);
+            autoSave();
             showStatus('Charakter geladen.');
           }catch(err){
             showStatus('Datei konnte nicht gelesen werden.');
@@ -997,6 +1031,15 @@
         reader.readAsText(file);
         loadInput.value = '';
       });
+
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        if (confirm('Wirklich einen neuen, leeren Charakter beginnen? Die automatisch gespeicherten Eingaben in diesem Browser gehen dabei verloren (als Datei gespeicherte Charaktere bleiben erhalten).')){
+          try{ localStorage.removeItem(LOCAL_STORAGE_KEY); }catch(e){}
+          location.reload();
+        }
+      });
+
+      autoLoadOnStart();
     })();
   </script>
 
